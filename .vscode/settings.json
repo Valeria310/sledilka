@@ -1,0 +1,34 @@
+{
+  "eslint.format.enable": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "cSpell.words": ["abortable", "Addrs", "modbuses", "ngio", "ngios"],
+  "eslint.rules.customizations": [],
+  "eslint.debug": true,
+  "eslint.lintTask.enable": true,
+  "eslint.nodePath": "/home/alex/.nvm/versions/node/v18.16.0/bin/node",
+  "eslint.probe": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "html",
+    "vue",
+    "markdown",
+    "TypeScript"
+  ],
+  "eslint.runtime": "/home/alex/.nvm/versions/node/v18.16.0/bin/node",
+  "eslint.trace.server": "messages",
+  "eslint.validate": ["typescript"],
+  "prettier.requireConfig": true,
+  "prettier.singleQuote": true,
+"prettier.printWidth": 100,
+"liveServer.settings.port": 5501
+}

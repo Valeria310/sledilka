@@ -1,0 +1,195 @@
+{
+    "modbusProps": {
+        "sensors": {
+            "baudRate": 9600,
+            "stopBits": 1,
+            "dataBits": 8,
+            "parity": "none"
+        },
+        "ngio": {
+            "baudRate": 57600,
+            "stopBits": 1,
+            "dataBits": 8,
+            "parity": "none"
+        }
+    },
+    "sensorsWeightSilosAddrs": [
+        32,
+        40,
+        48,
+        56,
+        64,
+        72,
+        80,
+        88
+    ],
+    "sensorsWeightRegAddrs": {
+        "default": [
+            70,
+            72,
+            74,
+            76
+        ],
+        "silos": [
+            [
+                0,
+                2,
+                4,
+                6
+            ],
+            [
+                100,
+                102,
+                104,
+                106
+            ],
+            [
+                200,
+                202,
+                204,
+                206
+            ],
+            [
+                300,
+                302,
+                304,
+                306
+            ]
+        ]
+    },
+    "ngioAddrs": [
+        1,
+        2,
+        3
+    ],
+    "ngioStartRegAddr": 5120,
+    "ngioSilos": [
+        {
+            "devAddr": 2,
+            "regAddrs": {
+                "shutter": {
+                    "completelyClosedState": {
+                        "addr": 0,
+                        "type": "di"
+                    },
+                    "completelyOpenState": {
+                        "addr": 1,
+                        "type": "di"
+                    },
+                    "doOpen": {
+                        "addr": 1,
+                        "type": "hr"
+                    },
+                    "doClose": {
+                        "addr": 0,
+                        "type": "hr"
+                    }
+                },
+                "loader": {
+                    "slow": {
+                        "addr": 14,
+                        "type": "hr"
+                    },
+                    "fast": {
+                        "addr": 15,
+                        "type": "hr"
+                    }
+                }
+            }
+        }
+    ],
+    "ngioMain": {
+        "devAddr": 3,
+        "regAddr": {
+            "manualControl": {
+                "addr": 0,
+                "type": "di"
+            },
+            "autoControl": {
+                "addr": 1,
+                "type": "di"
+            },
+            "ACstatus": {
+                "addr": 2,
+                "type": "di"
+            },
+            "threePhasesSwitchers": [
+                {
+                    "addr": 3,
+                    "type": "di"
+                },
+                {
+                    "addr": 4,
+                    "type": "di"
+                },
+                {
+                    "addr": 5,
+                    "type": "di"
+                },
+                {
+                    "addr": 6,
+                    "type": "di"
+                }
+            ]
+        }
+    },
+    "ngioWeights": {
+        "devAddr": 1,
+        "silosRegAddr": [
+            {
+                "bottom": {
+                    "addr": 0,
+                    "type": "di"
+                },
+                "top": {
+                    "addr": 1,
+                    "type": "di"
+                }
+            },
+            {
+                "bottom": {
+                    "addr": 2,
+                    "type": "di"
+                },
+                "top": {
+                    "addr": 3,
+                    "type": "di"
+                }
+            },
+            {
+                "bottom": {
+                    "addr": 4,
+                    "type": "di"
+                },
+                "top": {
+                    "addr": 5,
+                    "type": "di"
+                }
+            },
+            {
+                "bottom": {
+                    "addr": 6,
+                    "type": "di"
+                },
+                "top": {
+                    "addr": 7,
+                    "type": "di"
+                }
+            }
+        ]
+    },
+    "speedPerSec": {
+        "default": {
+            "shutterOpenClose": 0.25,
+            "unloadKg": 140
+        },
+        "silos": [
+            {
+                "shutterOpenClose": 0.25,
+                "unloadKg": 140
+            },
+            null
+        ]
+    },
+    "weightThreshold": 50
+}

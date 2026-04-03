@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+}
+
+model Bus {
+  id                    Int         @id @default(autoincrement())
+  number                String      @unique
+  mileage               Int
+  totalMileage          Int
+  oilChangeDate         DateTime
+  oilChangeMileage      Int         @default(0)
+  mileageBeforeNotif    Int         @default(0)
+  isBus                 Int  //0 for car, 1 for bus
+  lastEnteredTotalCount Int         @default(0)
+  lastEnteringDate      DateTime    @default(now())
+  detailsJournal        DetailsJournal[]
+}
+
+model DetailType {
+  id                  Int         @id @default(autoincrement())
+  name                String      @unique
+  category            String      @default("test")
+  detail              Detail[]
+}
+
+model Detail {
+  id                  Int         @id @default(autoincrement())
+  type                DetailType  @relation(fields: [typeId], references: [id])
+  typeId              Int
+  name                String      @default(" ")
+  inStock             Boolean     @default(true)
+  detailsJournal      DetailsJournal[]
+  quantity            Int         @default(1)
+}
+
+model DetailsJournal {
+  id                  Int         @id @default(autoincrement())
+  detail              Detail      @relation(fields: [detailId], references: [id])
+  detailId            Int
+  bus                 Bus         @relation(fields: [busId], references: [id])
+  busId               Int
+  date                DateTime    @default(now())
+  quantity            Int         @default(1)
+}

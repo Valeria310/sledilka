@@ -1,0 +1,274 @@
+#!/usr/bin/env node
+import prompts from 'prompts';
+import chalk from 'chalk';
+import Joi from 'joi';
+import { readFile, writeFile, copyFile, access, constants } from 'fs/promises';
+import { spawn } from 'child_process';
+
+const configPath = './config.json';
+
+const modbusSchema = Joi.object({
+  baudRate: Joi.number().integer().min(1).required(),
+  stopBits: Joi.number().integer().min(1).max(2).required(),
+  dataBits: Joi.number().integer().min(1).max(8).required(),
+  parity: Joi.string().valid('none', 'even', 'odd').required(),
+}).required();
+const regAddrSchema = Joi.object({
+  addr: Joi.number().integer().min(0).max(65535).required(),
+  type: Joi.string().valid('di', 'hr').required(),
+}).required();
+
+const speedSchema = Joi.object({
+  shutterOpenClose: Joi.number().greater(0).required(),
+  unloadKg: Joi.number().integer().greater(0).required(),
+}).required();
+
+const configSchema = Joi.object({
+  modbusProps: Joi.object({
+    sensors: modbusSchema,
+    ngio: modbusSchema,
+  }).required(),
+  sensorsWeightSilosAddrs: Joi.array().items(Joi.number().integer().min(0).max(255)).required(),
+  sensorsWeightRegAddrs: Joi.object({
+    default: Joi.array().length(4).items(Joi.number().integer().min(0).max(65535)).required(),
+    silos: Joi.array()
+      .max(
+        Joi.ref('/sensorsWeightSilosAddrs', {
+          render: true,
+          adjust: (value) => value.length,
+        })
+      )
+      .items(
+        Joi.allow(Joi.array().length(4).items(Joi.number().integer().min(0).max(65535)), null)
+      ),
+  }),
+  ngioAddrs: Joi.array().items(Joi.number().integer().min(0).max(255)).required(),
+  ngioStartRegAddr: Joi.number()
+    .integer()
+    .min(0)
+    .max(65535 - 16)
+    .required(),
+  ngioSilos: Joi.array()
+    .length(
+      Joi.ref('/sensorsWeightSilosAddrs', {
+        render: true,
+        adjust: (value) => value.length,
+      })
+    )
+    .items(
+      Joi.object({
+        devAddr: Joi.number().integer().min(0).max(255).required(),
+        regAddrs: Joi.object({
+          shutter: Joi.object({
+            completelyClosedState: regAddrSchema,
+            completelyOpenState: regAddrSchema,
+            doOpen: regAddrSchema,
+            doClose: regAddrSchema,
+          }).required(),
+          loader: Joi.object({
+            slow: regAddrSchema,
+            fast: regAddrSchema,
+          }).required(),
+        }).required(),
+      })
+    )
+    .required(),
+  speedPerSec: Joi.object({
+    default: speedSchema,
+    silos: Joi.array().items(Joi.allow(speedSchema, null)).required(),
+  }).required(),
+  ngioMain: Joi.object({
+    devAddr: Joi.number().integer().min(0).max(255).required(),
+    regAddr: Joi.object({
+          manualControl: regAddrSchema,
+          autoControl: regAddrSchema,
+          ACstatus: regAddrSchema,
+          threePhasesSwitchers: Joi.array().items(Joi.allow(regAddrSchema)).required(),
+        }).required()
+  }),
+  ngioWeights: Joi.object({
+    devAddr:Joi.number().integer().min(0).max(255).required(),
+    silosRegAddr: Joi.array().items(Joi.object({
+        bottom: regAddrSchema,
+        top: regAddrSchema
+    }))
+  }),
+//   speedStatMaxLength: Joi.number().integer().min(1).max(100).required(),
+  weightThreshold: Joi.number().integer().min(0).required(),
+});
+
+function onCancel() {
+  console.log(chalk.cyan.bold('\nBye stranger! Have a nice day!'));
+  process.exit(0);
+}
+
+async function editConigConfirmation() {
+  const response = await prompts(
+    {
+      type: 'select',
+      name: 'value',
+      message: 'Do you want to edit config.json file right here?',
+      choices: [
+        { title: "Yes, let's do it!", value: 1 },
+        { title: "No, I'll do it by myself", value: 2 },
+      ],
+      initial: 0,
+    },
+    { onCancel }
+  );
+  if (response.value === 2) {
+    console.log(chalk.cyan.bold('\nPlease edit config.json file and run this script again! Bye!'));
+  }
+  return response.value === 1;
+}
+
+function editConfig() {
+  return new Promise((res) => {
+    const ls = spawn('mcedit', [configPath], { shell: true, stdio: 'inherit' });
+    ls.on('close', res);
+  });
+}
+
+async function readConfig() {
+  let config;
+  try {
+    const f = await readFile(configPath, 'utf8');
+    config = JSON.parse(f);
+    return config;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.log(chalk.red.bold('\nSorry, but no config.json file found!'));
+      return null;
+      //   await copyFile('./data/config.example.json', configPath);
+      //   return readConfig();
+    } else {
+      console.log(chalk.red.bold('\nSorry, but the config.json file is not valid json!'));
+
+      if (await editConigConfirmation()) {
+        await editConfig();
+        return readConfig();
+      }
+      return null;
+    }
+  }
+}
+
+async function checkIfConfigExists() {
+  try {
+    await access(configPath, constants.R_OK);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function writeConfig() {
+  const config = await readConfig();
+  if (!config) {
+    return;
+  }
+  const { error: validationError, value: validatedConfig } = configSchema.validate(config);
+  if (validationError) {
+    console.log(chalk.bold.red(validationError.details[0].message));
+    if (await editConigConfirmation()) {
+      await editConfig();
+      return writeConfig();
+    }
+    return;
+  }
+  try {
+    await writeFile('./data/config.json', JSON.stringify(validatedConfig, null, 2));
+  } catch (error) {
+    console.log(
+      chalk.red.bold(
+        '\nSorry, but something went wrong while writing config.json file! Give a call to the developer!'
+      )
+    );
+    return;
+  }
+  return 'success';
+}
+
+async function setConfig() {
+  const isConfigExists = await checkIfConfigExists();
+  let response = {};
+  if (isConfigExists) {
+    response = await prompts(
+      {
+        type: 'confirm',
+        name: 'value',
+        message: 'Do you want to edit config.json before setting it up?',
+      },
+      { onCancel }
+    );
+    if (response.value) {
+      await editConfig();
+    }
+  } else {
+    response = await prompts(
+      {
+        type: 'select',
+        name: 'value',
+        message:
+          'To set config, place your config.json file in the root directory of this project.\n  Or it can be made automatically. What to do?',
+        choices: [
+          { title: 'Create config.json file automatically', value: 1 },
+          { title: "Exit, I'll do it by myself", value: 2 },
+        ],
+        initial: 0,
+      },
+      { onCancel }
+    );
+    if (response.value === 2) {
+      console.log(chalk.cyan.bold('\nWaiting for you to be back! Bye!'));
+      return;
+    }
+    await copyFile('./data/config.example.json', configPath);
+    response = await prompts(
+      {
+        type: 'confirm',
+        name: 'value',
+        message: 'File created! Do you want to edit it right here?',
+        initial: true,
+      },
+      { onCancel }
+    );
+    if (!response.value) {
+      console.log(
+        chalk.cyan.bold('\nPlease edit config.json file and run this script again! Bye!')
+      );
+      return;
+    }
+    await editConfig();
+  }
+  if ((await writeConfig()) === 'success') {
+    console.log(chalk.green.bold('\nConfig set successfully!'));
+  }
+}
+
+async function main() {
+  const response = await prompts(
+    {
+      type: 'select',
+      name: 'value',
+      message: 'Hi stranger! What do you want to do?',
+      choices: [
+        { title: 'Set up config', value: 1 },
+        { title: 'Start/restart EVO silos manager', value: 2 },
+        { title: 'Stop EVO silos manager', value: 3 },
+      ],
+      initial: 0,
+    },
+    { onCancel }
+  );
+
+  switch (response.value) {
+    case 1:
+      setConfig();
+      break;
+    default:
+      return;
+  }
+}
+
+main();
