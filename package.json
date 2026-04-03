@@ -9,6 +9,7 @@
     },
     "scripts": {
         "build": "tsc",
+        "postinstall": "prisma generate",
         "start": "node dist/index.js",
         "lint": "eslint --fix src",
         "typecheck": "tsc --noEmit",
