@@ -7,6 +7,10 @@ import Joi from 'joi';
 import chalk from 'chalk';
 async function main() {
     const app = express();
+    app.use((req, res, next) => {
+        res.setHeader('Cache-Control', 'no-store');
+        next();
+    });
     app.use(cors());
     app.use(express.json());
 
