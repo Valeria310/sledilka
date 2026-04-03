@@ -4,6 +4,9 @@
     "description": "Silos Manager by EVO controls",
     "main": "src/index.ts",
     "type": "module",
+    "engines": {
+        "node": "18.x"
+    },
     "scripts": {
         "build": "tsc",
         "start": "node dist/index.js",
