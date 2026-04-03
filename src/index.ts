@@ -14,6 +14,7 @@ async function main() {
         try {
             const buses = await prisma.bus.findMany();
             const currentDate = new Date();
+            console.log(currentDate, buses);
             res.json(
                 buses.map((el) => {
                     let startDate;
