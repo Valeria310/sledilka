@@ -152,7 +152,9 @@ async function main() {
                     const [day, month, year] = startDate.toLocaleDateString().split('.');
                     const targetDate = new Date(`${year}-${month}-${day}`);
                     const differenceInTime = (currentDate as any) - (targetDate as any);
-                    console.log(currentDate, targetDate, differenceInTime);
+                    console.log([currentDate], currentDate);
+                    console.log([targetDate], targetDate);
+                    console.log([differenceInTime], differenceInTime);
                     const mileageAfterLastOilChange =
                         Math.ceil(differenceInTime / (1000 * 60 * 60 * 24)) * el.mileage +
                         startTotalMileage;
