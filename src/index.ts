@@ -229,7 +229,8 @@ async function main() {
 
     app.get('/get_detailsTypes', async (req, res) => {
         try {
-            const types = await prisma.detailType.findMany().forEach(async (type) => {
+            const types = await prisma.detailType.findMany();
+            const updatedTypes = types.forEach(async (type) => {
                 const details = await prisma.detail.findMany({
                     where: {
                         typeId: type.id,
@@ -238,7 +239,7 @@ async function main() {
                 type = Object.assign(type, { canEdit: details.length === 0, test: 'true' });
             });
             setTimeout(() => {
-                res.json(types);
+                res.json(updatedTypes);
             }, 5000);
         } catch (error) {
             console.error(chalk.red(error));
