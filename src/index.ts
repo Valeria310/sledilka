@@ -230,17 +230,16 @@ async function main() {
     app.get('/get_detailsTypes', async (req, res) => {
         try {
             const types = await prisma.detailType.findMany();
-            types.forEach(async (type) => {
-                const details = await prisma.detail.findMany({
-                    where: {
-                        typeId: type.id,
-                    },
-                });
-                type = Object.assign(type, { canEdit: details.length === 0, test: 'true' });
-            });
-            setTimeout(() => {
-                res.json(types);
-            }, 3000);
+            res.json(
+                types.forEach(async (type) => {
+                    const details = await prisma.detail.findMany({
+                        where: {
+                            typeId: type.id,
+                        },
+                    });
+                    type = Object.assign(type, { canEdit: details.length === 0, test: 'true' });
+                }),
+            );
         } catch (error) {
             console.error(chalk.red(error));
             res.status(400).send('Ошибка запроса');
