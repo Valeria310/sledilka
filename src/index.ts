@@ -119,6 +119,24 @@ async function main() {
         }
     });
 
+    app.post('/update_bus', async (req, res) => {
+        const { id, number } = req.body;
+        try {
+            await prisma.bus.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    number: number,
+                },
+            });
+            res.status(200).send('ok');
+        } catch (error) {
+            console.error(chalk.red(error));
+            res.status(400).send('Ошибка запроса');
+        }
+    });
+
     app.post('/delete_bus', async (req, res) => {
         const { id } = req.body;
         try {
