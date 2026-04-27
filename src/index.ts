@@ -237,9 +237,12 @@ async function main() {
                         where: { typeId: type.id },
                     });
 
+                    const plain = JSON.parse(JSON.stringify(type));
+
                     return {
-                        ...type,
+                        ...plain,
                         canEdit: details.length === 0,
+                        test: 'true',
                     };
                 }),
             );
