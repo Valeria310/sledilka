@@ -152,9 +152,6 @@ async function main() {
                     const [day, month, year] = startDate.toLocaleDateString().split('.');
                     const targetDate = new Date(`${year}-${month}-${day}`);
                     const differenceInTime = (currentDate as any) - (targetDate as any);
-                    console.log([currentDate], currentDate);
-                    console.log([targetDate], targetDate);
-                    console.log([differenceInTime], differenceInTime);
                     const mileageAfterLastOilChange =
                         Math.ceil(differenceInTime / (1000 * 60 * 60 * 24)) * el.mileage +
                         startTotalMileage;
@@ -234,7 +231,8 @@ async function main() {
             res.status(200).send('ok');
         } catch (error) {
             console.error(chalk.red(error));
-            res.status(400).send('Ошибка запроса');
+            // TODO: сделать нормальную обработку
+            res.status(400).send('Вероятно, такой тип уже существует');
         }
     });
 
