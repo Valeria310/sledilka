@@ -242,7 +242,6 @@ async function main() {
                     return {
                         ...plain,
                         canEdit: details.length === 0,
-                        test: 'true',
                     };
                 }),
             );
@@ -333,6 +332,30 @@ async function main() {
                 });
             }
             res.status(200).send('ok');
+        } catch (error) {
+            console.error(chalk.red(error));
+            res.status(400).send('Ошибка запроса');
+        }
+    });
+
+    app.post('/remove_detail', async (req, res) => {
+        const { id } = req.body;
+        try {
+            const detail = await prisma.detail.findFirst({
+                where: {
+                    id: id,
+                },
+            });
+            if (detail) {
+                await prisma.detail.delete({
+                    where: {
+                        id: detail.id,
+                    },
+                });
+                res.status(200).send('ok');
+            } else {
+                res.status(400).send('Деталь отсутствует!');
+            }
         } catch (error) {
             console.error(chalk.red(error));
             res.status(400).send('Ошибка запроса');
