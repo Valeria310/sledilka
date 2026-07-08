@@ -372,7 +372,7 @@ async function main() {
             });
             const details = await prisma.detail.findMany({
                 where: {
-                    type: id,
+                    id: type.id,
                 },
             });
             if (details.length) {
