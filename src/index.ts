@@ -376,9 +376,8 @@ async function main() {
                         id: id,
                     },
                 });
-                console.log(details);
                 if (details.length) {
-                    res.status(400).send('Имеются детали!');
+                    res.status(400).send(details);
                     return;
                 }
                 await prisma.detailType.delete({
