@@ -373,11 +373,11 @@ async function main() {
             if (type) {
                 const details = await prisma.detail.findMany({
                     where: {
-                        id: id,
+                        typeId: id,
                     },
                 });
                 if (details.length) {
-                    res.status(400).send(details);
+                    res.status(400).send('Имеются детали!');
                     return;
                 }
                 await prisma.detailType.delete({
