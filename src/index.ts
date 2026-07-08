@@ -370,25 +370,25 @@ async function main() {
                     id: id,
                 },
             });
-            if (type) {
-                const details = await prisma.detail.findMany({
-                    where: {
-                        id: type.id,
-                    },
-                });
-                if (details.length) {
-                    res.status(400).send('Имеются детали!');
-                    return;
-                }
-                await prisma.detailType.delete({
-                    where: {
-                        id: type.id,
-                    },
-                });
-                res.status(200).send('ok');
-            } else {
-                res.status(400).send('Тип отсутствует!');
-            }
+            // if (type) {
+            //     const details = await prisma.detail.findMany({
+            //         where: {
+            //             id: type.id,
+            //         },
+            //     });
+            //     if (details.length) {
+            //         res.status(400).send('Имеются детали!');
+            //         return;
+            //     }
+            //     await prisma.detailType.delete({
+            //         where: {
+            //             id: type.id,
+            //         },
+            //     });
+            //     res.status(200).send('ok');
+            // } else {
+            //     res.status(400).send('Тип отсутствует!');
+            // }
         } catch (error) {
             console.error(chalk.red(error));
             res.status(400).send('Ошибка запроса');
