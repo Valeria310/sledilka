@@ -370,16 +370,16 @@ async function main() {
                     id: id,
                 },
             });
-            const details = await prisma.detail.findMany({
-                where: {
-                    id: type.id,
-                },
-            });
-            if (details.length) {
-                res.status(400).send('Имеются детали!');
-                return;
-            }
             if (type) {
+                const details = await prisma.detail.findMany({
+                    where: {
+                        id: type.id,
+                    },
+                });
+                if (details.length) {
+                    res.status(400).send('Имеются детали!');
+                    return;
+                }
                 await prisma.detailType.delete({
                     where: {
                         id: type.id,
