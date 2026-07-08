@@ -362,6 +362,39 @@ async function main() {
         }
     });
 
+    app.post('/remove_type', async (req, res) => {
+        const { id } = req.body;
+        try {
+            const type = await prisma.detailType.findFirst({
+                where: {
+                    id: id,
+                },
+            });
+            const details = await prisma.detail.findMany({
+                where: {
+                    type: id,
+                },
+            });
+            if (details.length) {
+                res.status(400).send('Имеются детали!');
+                return;
+            }
+            if (type) {
+                await prisma.detailType.delete({
+                    where: {
+                        id: type.id,
+                    },
+                });
+                res.status(200).send('ok');
+            } else {
+                res.status(400).send('Тип отсутствует!');
+            }
+        } catch (error) {
+            console.error(chalk.red(error));
+            res.status(400).send('Ошибка запроса');
+        }
+    });
+
     app.post('/get_detailById', async (req, res) => {
         const { id } = req.body;
         try {
