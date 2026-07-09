@@ -16,7 +16,7 @@ async function main() {
 
     app.get('/get_buses', async (req, res) => {
         try {
-            const buses = await prisma.bus.findMany();
+            const buses = await prisma.bus.findMany({ where: { mileage: { not: -1 } } });
             const currentDate = new Date();
             res.json(
                 buses.map((el) => {
@@ -140,7 +140,8 @@ async function main() {
     app.post('/delete_bus', async (req, res) => {
         const { id } = req.body;
         try {
-            await prisma.bus.delete({
+            await prisma.bus.update({
+                data: { mileage: -1 },
                 where: {
                     id: id,
                 },
