@@ -348,7 +348,10 @@ async function main() {
                 },
             });
             if (detail) {
-                await prisma.detail.delete({
+                await prisma.detail.update({
+                    data: {
+                        quantity: -100,
+                    },
                     where: {
                         id: detail.id,
                     },
@@ -375,13 +378,17 @@ async function main() {
                 const details = await prisma.detail.findMany({
                     where: {
                         typeId: id,
+                        quantity: { not: -100 },
                     },
                 });
                 if (details.length) {
                     res.status(400).send('Имеются детали!');
                     return;
                 }
-                await prisma.detailType.delete({
+                await prisma.detailType.update({
+                    data: {
+                        category: 'Удалённые',
+                    },
                     where: {
                         id: type.id,
                     },
